@@ -1,2 +1,1 @@
-# ruby11
-Operational tool for Infrastructure with shell script magazine.
+# Let's Create a Management Program for Infrastructure with Shell Script Magazine
