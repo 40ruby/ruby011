@@ -1,27 +1,32 @@
 #!/usr/bin/env ruby
 # coding: utf-8
-# filename: server.rb
+# filename: client.rb
 require "socket"
 require "optparse"
 
-# 変数初期化
 host = 'localhost'
 comm = 'add'
+opt  = ''
 PORT = 16383
 
-# 4-1. 引数解析
-parms = ARGV.getopts('alc:h:')
+# 2-1. 制御コードの追加
+parms = ARGV.getopts('alc:h:u:d:')
 
-# 4-2. 入力内容から割り当て
 comm = 'add'      if parms["a"]
 comm = 'list'     if parms["l"]
 comm = parms["c"] if parms["c"]
 host = parms["h"] if parms["h"]
 
-# 4-3. サーバへ送信&受信
+# 2-2. 今回の追加コマンド
+comm = 'update'   if parms["u"]
+opt  = parms["u"] if parms["u"]
+comm = 'delete'   if parms["d"]
+opt  = parms["d"] if parms["d"]
+
 s = TCPSocket.open(host, PORT)
 
-s.puts(comm + "\n")
+# 2-3. オプション制御の追加
+s.puts(comm + " " + opt + "\n")
 print s.read
 
 s.close
