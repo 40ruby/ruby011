@@ -1,4 +1,7 @@
 *.gem
+*.plist
+.*.plist
+*.txt
 *.rbc
 /.config
 /coverage/
