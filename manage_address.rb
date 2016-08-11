@@ -13,15 +13,11 @@ class ManageAddress
   def initialize(filename)
     @filename = filename
     begin
-      if File.exist?(filename)
-        fp = File.open(filename)
-      else
-        fp = File.open(filename, "w+")
-      end
+      mode = File.exist?(filename) ? "r" : "w"
+      fp   = File.open(filename, mode)
     rescue => e
       abort "#{e.class} => #{e.message}"
     end
-
     @addrs = fp.each_line.map { |addr|
       addr.chomp
     }
@@ -67,8 +63,7 @@ class ManageAddress
   end
 
   # 登録済みのアドレスを、他のアドレスへ変更する
-  # もし、変更前のものが登録されていなければ、変更前のものも登録する
-  # ただし、変更後のアドレスが既に登録されている場合はエラーを返す
+  # ただし、変更後のアドレスが既に登録されている場合や、登録済みアドレスが見つからない場合はエラーを返す
   # == パラメータ
   # before:: 既に登録済みのアドレス
   # after::  変更後のアドレス
@@ -79,9 +74,7 @@ class ManageAddress
       @addrs[i] = after
       return true
     else
-      @addrs << before
-      @addrs << after
-      return true
+      return false
     end
   end
 

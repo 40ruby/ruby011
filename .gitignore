@@ -4,6 +4,7 @@
 *.txt
 *.rbc
 *.csv
+/.ruby-version
 /.config
 /coverage/
 /InstalledFiles
