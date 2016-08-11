@@ -3,6 +3,7 @@
 .*.plist
 *.txt
 *.rbc
+*.csv
 /.config
 /coverage/
 /InstalledFiles
