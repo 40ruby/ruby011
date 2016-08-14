@@ -13,7 +13,7 @@ class ManageAddress
   def initialize(filename)
     @filename = filename
     begin
-      mode = File.exist?(filename) ? "r" : "w"
+      mode = File.exist?(filename) ? "r" : "w+"
       fp   = File.open(filename, mode)
     rescue => e
       abort "#{e.class} => #{e.message}"
