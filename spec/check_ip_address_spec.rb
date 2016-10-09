@@ -1,4 +1,4 @@
-require_relative '../check_ip_address'
+require_relative '../lib/check_ip_address'
 
 describe 'CheckIPAddress' do
   describe '一つの文字列を引数として' do
