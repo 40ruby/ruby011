@@ -2,15 +2,15 @@
 # coding: utf-8
 # filename: server.rb
 require "socket"
-
-# 初期化
-PORT    = 16383         # 待受ポート番号
-db_file = "40ruby.txt"  # 保管先ファイル名
-
 require "./manage_address.rb"
 
-hosts  = ManageAddress.new(db_file)
-server = TCPServer.new(PORT)
+# 初期化
+PORT    = 16383               # 待受ポート番号
+db_file = "40ruby.txt"        # 保管先ファイル名
+logfile = "./logs/server.log" # ログファイル名
+hosts   = ManageAddress.new(db_file, logfile)
+
+server  = TCPServer.new(PORT)
 
 # メインルーチン
 loop do
@@ -20,49 +20,37 @@ loop do
       addr = client.peeraddr[3]
       comm = client.gets.chomp
 
-# 1-1. コマンドごとにメソッドを実行
+      # 1-1. コマンドごとにメソッドを実行
       case comm
       when /^(add|create).*/ then
-        status = hosts.create(addr) ? "OK" : "NG"
-        print Time.now, ": add ", status, "\n"
-        client.puts status
+        client.puts hosts.create(addr) ? "OK" : "NG"
 
       when /^list/ then
-        status = hosts.empty? ? "NG" : "OK"
-        print Time.now, ": list ", status, "\n"
-        client.puts status
-        hosts.read.each do |host|
-          client.puts host
+        unless hosts.empty? then
+          hosts.read.each do |host|
+            client.puts host
+          end
         end
 
-# 1-2. 'update' と 'remove'コマンドを追加
+        # 1-2. 'update' と 'remove'コマンドを追加
       when /^update.*/ then
         command, options = comm.split
         before, update   = options.split(',')
-        status = hosts.update(before, update)
-        print Time.now, ": update ", status, "\n"
-        client.puts status
+        client.puts hosts.update(before, update) ? "OK" : "NG"
 
       when /^delete.*/ then
         command, options = comm.split
-        p command, options
         target = options ? options : addr
-        status = hosts.delete(target)
-        print Time.now, ": delete ", status, "\n"
-        client.puts status
-
-      else
-        print Time.now, ": Command not Found \n"
-        client.puts "NG"
+        client.puts hosts.delete(target) ? "OK" : "NG"
       end
 
       client.close
     end
 
-  # 1-3. ctrl+c が押された場合に、終了処理を入れる
+    # 1-3. ctrl+c が押された場合に、終了処理を入れる
   rescue Interrupt => e
-    print Time.now, ": server halt...\n"
-    hosts.store
+    p e
+    hosts.store()
     server.close
     exit
   end

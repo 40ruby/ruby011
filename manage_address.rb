@@ -1,8 +1,11 @@
 # filename: manage_address.rb
+require 'logger'
+require './lib/ip_address.rb'
 
 class ManageAddress
   # 登録済みアドレスリスト
   attr_reader :addrs
+  include IPAddress
 
   # データベースの読込・初期化
   # ファイルが存在していれば内容を読込、なければファイルを新規に作成
@@ -10,18 +13,21 @@ class ManageAddress
   # filename:: 読込・または保管先のファイル名
   # == 返り値
   # 特になし。但し、@addrs インスタンス変数へ、データベースの内容を保持
-  def initialize(filename)
+  def initialize(filename, logfile = "/tmp/log")
     @filename = filename
     begin
       mode = File.exist?(filename) ? "r" : "w+"
       fp   = File.open(filename, mode)
     rescue => e
+      @log.fatail(e.message)
       abort "#{e.class} => #{e.message}"
     end
     @addrs = fp.each_line.map { |addr|
       addr.chomp
     }
     fp.close
+
+    @log = Logger.new(logfile)
   end
 
   # メモリ上のアドレスリストを、ファイルへ保管する
@@ -31,6 +37,7 @@ class ManageAddress
     begin
       fp = File.open(filename, "w")
     rescue => e
+      @log.fatal(e.message)
       abort "#{e.class} => #{e.message}"
     end
 
@@ -45,12 +52,19 @@ class ManageAddress
   # addr:: 登録する IPアドレス
   # == 返り値
   # true::  登録できた
-  # false:: 既に同じアドレスあり、登録せず
+  # false:: 既に同じアドレスまたはIPアドレスではないため、登録せず
   def create(addr)
-    unless @addrs.include?(addr) then
-      @addrs << addr
-      return true
+    if CheckIP(addr) then
+      unless @addrs.include?(addr) then
+        @addrs << addr
+        @log.info("#{addr} を追加しました.")
+        return true
+      else
+        @log.error("#{addr} は既に登録されています.")
+        return false
+      end
     else
+      @log.error("#{addr} は登録可能なIPアドレスではありません.")
       return false
     end
   end
@@ -68,12 +82,15 @@ class ManageAddress
   # before:: 既に登録済みのアドレス
   # after::  変更後のアドレス
   def update(before, after)
-    if @addrs.include?(after) then
+    if @addrs.include?(after) || !CheckIP(after) then
+      @log.error("#{after} は既に登録済みか、有効なIPアドレスではありません.")
       return false
     elsif i = @addrs.index(before) then
+      @log.info("#{before} から #{after} へ変更しました.")
       @addrs[i] = after
       return true
     else
+      @log.error("変更元の #{before} が見つかりません.")
       return false
     end
   end
@@ -85,7 +102,13 @@ class ManageAddress
   # string:: 削除された要素
   # nil::    削除すべき要素が見つからなかったとき
   def delete(addr)
-    return @addrs.delete(addr)
+    if @addrs.delete(addr) == addr then
+      @log.info("#{addr} を削除しました.")
+      return addr
+    else
+      @log.warn("#{addr} が見つかりません.")
+      return nil
+    end
   end
 
   # まだアドレスが登録されていないかどうか
