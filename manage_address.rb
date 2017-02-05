@@ -15,6 +15,7 @@ class ManageAddress
   # 特になし。但し、@addrs インスタンス変数へ、データベースの内容を保持
   def initialize(filename, logfile = "/tmp/log")
     @filename = filename
+    @log = Logger.new(logfile)
     begin
       mode = File.exist?(filename) ? "r" : "w+"
       fp   = File.open(filename, mode)
@@ -26,8 +27,6 @@ class ManageAddress
       addr.chomp
     }
     fp.close
-
-    @log = Logger.new(logfile)
   end
 
   # メモリ上のアドレスリストを、ファイルへ保管する
