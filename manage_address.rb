@@ -1,3 +1,4 @@
+# encoding: utf-8
 # filename: manage_address.rb
 require 'logger'
 require './lib/ip_address.rb'
@@ -56,7 +57,7 @@ class ManageAddress
     if CheckIP(addr) then
       unless @addrs.include?(addr) then
         @addrs << addr
-        @log.info("#{addr} を追加しました.")
+        @log.info("#{addr} を追加しました")
         return true
       else
         @log.error("#{addr} は既に登録されています.")
