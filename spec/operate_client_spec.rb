@@ -7,6 +7,7 @@ describe 'OperateClient' do
   before { @server = TCPServer.new(24368) }
   after  { @server.close }
   let(:client) { OperateClient.new }
+
   describe '#connect' do
     context '正常接続' do
       subject { client.connect }
@@ -15,8 +16,9 @@ describe 'OperateClient' do
         is_expected.to eq(true)
       end
     end
+
     context '接続不可' do
-      it { expect{ OperateClient.new('127.0.0.1', 65000) }.to raise_error 'Not Connect' }
+      it { expect{ OperateClient.new('localhost', 65000) }.to raise_error 'Not Connect' }
       it 'クライアントが停止していたら' do
         allow(client).to receive(:connect).and_return(false)
         expect(client.connect).to eq(false)
@@ -24,4 +26,10 @@ describe 'OperateClient' do
     end
   end
 
+  describe '#disconnect' do
+    context '切断' do
+      subject { client.disconnect }
+      it { is_expected.to eq(nil) }
+    end
+  end
 end

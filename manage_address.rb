@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 # filename: manage_address.rb
 require 'logger'
 require './lib/ip_address.rb'
